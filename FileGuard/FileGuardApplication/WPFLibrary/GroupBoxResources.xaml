@@ -1,0 +1,22 @@
+﻿<ResourceDictionary x:Class="FileGuardApplication.WPFLibrary.GroupBoxResources"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FileGuardApplication.WPFLibrary"
+        mc:Ignorable="d">
+
+    <Style x:Key="GroupBoxStyling" TargetType="GroupBox">
+        <Setter Property="Margin" Value="2"/>
+        <Setter Property="BorderBrush" Value="Gray"/>
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="HeaderTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <Label Content="{Binding}" FontSize="14" FontWeight="SemiBold"/>
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>
