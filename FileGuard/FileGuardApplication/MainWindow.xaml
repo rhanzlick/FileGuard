@@ -26,10 +26,24 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-
+        
         <GroupBox Grid.Row="0" Grid.Column="0" Grid.RowSpan="20" Style="{StaticResource GroupBoxStyling}" Header="Monitored Resources">
-            
+            <Expander ExpandDirection="Right">
+                <StackPanel Margin="4">
+                    <ListView ItemsSource="{Binding}" VerticalAlignment="Stretch">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Button/>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+            </Expander>
         </GroupBox>
+            
+        <Border Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" BorderBrush="LightGray" BorderThickness="2">
+            <ContentControl x:Name="ProcessDisplay" Margin="2" Content="{Binding}"/>
+        </Border>
         
     </Grid>
 </Window>

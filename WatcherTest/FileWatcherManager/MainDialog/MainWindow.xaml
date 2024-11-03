@@ -1,0 +1,138 @@
+﻿<Window x:Class="MainDialog.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MainDialog"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800"
+        x:Name="MainWatcherWindow">
+
+    <Window.Background>SlateGray</Window.Background>
+
+    <Grid Margin="6">
+
+        <Grid.Resources>
+            <ResourceDictionary>
+                <Style TargetType="TextBlock">
+                    <Setter Property="FontSize" Value="14" />
+                    <Setter Property="Background" Value="AliceBlue" />
+                    <Style.Triggers>
+                        <Trigger Property="Background" Value="SlateGray">
+                            <Setter Property="Foreground" Value="GhostWhite" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+
+                <Style TargetType="ListView">
+                    <Setter Property="Background" Value="AliceBlue" />
+                    <Style.Triggers>
+                        <Trigger Property="Background" Value="SlateGray">
+                            <Setter Property="Foreground" Value="GhostWhite" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+
+                <Style TargetType="Border">
+                    <Setter Property="BorderBrush" Value="DarkGray"/>
+                    <Setter Property="BorderThickness" Value="2" />
+                </Style>
+            </ResourceDictionary>
+        </Grid.Resources>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="80"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="120"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Row="0" Grid.Column="0" Grid.RowSpan="2">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Row="0" Grid.Column="0" Padding="4 6" Margin="2" Background="SlateGray">
+                <TextBlock.Text>
+                    Watched File:
+                </TextBlock.Text>
+            </TextBlock>
+
+            <TextBlock x:Name="CurrentPath" Grid.Row="0" Grid.Column="1" Padding="4 6" Margin="2">
+                <TextBlock.Text>
+                    <Binding Path="WatchedPath" Mode="OneWay" TargetNullValue="N/A" FallbackValue="N/A"/>
+                </TextBlock.Text>
+            </TextBlock>
+
+            <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="2">
+                <ListView x:Name="ChangeDetailList" ItemsSource="{Binding ChangeItemList, Mode=OneWay}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Timestamp" Width="auto">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="DisplayStamp" Mode="OneWay" TargetNullValue="" FallbackValue=""/>
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Change" Width="auto">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="DisplayChange" Mode="OneWay" TargetNullValue="" FallbackValue=""/>
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Details">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="ChangeDetails" Mode="OneWay" TargetNullValue="" FallbackValue=""/>
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </Border>
+
+        </Grid>
+
+        <Grid Grid.Row="0" Grid.Column="1" Grid.RowSpan="2">
+            <Grid.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="BorderBrush" Value="DarkGray" />
+                    <Setter Property="BorderThickness" Value="2" />
+                    <Setter Property="CornerRadius" Value="8" />
+                    <Setter Property="Margin" Value="2" />
+                </Style>
+
+                <Style TargetType="Button">
+                    <!--<Setter Property="BorderBrush" Value="Transparent"/>-->
+                    <!--<Setter Property="ClipToBounds" Value="True" />-->
+                    <!--<Setter Property="Foreground" Value="{Binding Background, ElementName=MainWatcherWindow}" />-->
+                </Style>
+            </Grid.Resources>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="80"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="80"/>
+            </Grid.RowDefinitions>
+
+            <Button Grid.Row="0" Content="Select Item" Click="SelectDir_Click"/>
+            <Button Grid.Row="2" Content="Close" Click="CloseButton_Click"/>
+
+            <!--<Border Grid.Row="0">
+                <Button Content="Select Item" Click="SelectDir_Click"/>
+            </Border>
+
+            <Border Grid.Row="2">
+                <Button Content="Close" Click="CloseButton_Click"/>
+            </Border>-->
+
+        </Grid>
+
+    </Grid>
+</Window>
