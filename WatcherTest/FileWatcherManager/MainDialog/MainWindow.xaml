@@ -64,7 +64,7 @@
 
             <TextBlock Grid.Row="0" Grid.Column="0" Padding="4 6" Margin="2" Background="SlateGray">
                 <TextBlock.Text>
-                    Watched File:
+                    Watched:
                 </TextBlock.Text>
             </TextBlock>
 
@@ -83,12 +83,17 @@
                                     <Binding Path="DisplayStamp" Mode="OneWay" TargetNullValue="" FallbackValue=""/>
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
+                            <GridViewColumn Header="Path" Width="auto">
+                                <GridViewColumn.DisplayMemberBinding>
+                                    <Binding Path="FilePath" Mode="OneWay" TargetNullValue="" FallbackValue=""/>
+                                </GridViewColumn.DisplayMemberBinding>
+                            </GridViewColumn>
                             <GridViewColumn Header="Change" Width="auto">
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="DisplayChange" Mode="OneWay" TargetNullValue="" FallbackValue=""/>
                                 </GridViewColumn.DisplayMemberBinding>
                             </GridViewColumn>
-                            <GridViewColumn Header="Details">
+                            <GridViewColumn Header="Description">
                                 <GridViewColumn.DisplayMemberBinding>
                                     <Binding Path="ChangeDetails" Mode="OneWay" TargetNullValue="" FallbackValue=""/>
                                 </GridViewColumn.DisplayMemberBinding>

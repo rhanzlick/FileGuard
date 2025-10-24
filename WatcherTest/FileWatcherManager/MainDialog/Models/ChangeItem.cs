@@ -11,6 +11,16 @@ namespace MainDialog.Models
 {
     public class ChangeItem : INotifyPropertyChanged
     {
+
+        private string filePath;
+
+        public string FilePath
+        {
+            get { return filePath; }
+            set { filePath = value; NotifyPropertyChanged(); }
+        }
+
+
         private DateTimeOffset timestamp = DateTimeOffset.UtcNow;
 
         public DateTimeOffset Timestamp
@@ -49,11 +59,13 @@ namespace MainDialog.Models
         {
             get
             {
-                if (changeMap.ContainsKey(ChangeType)) return changeMap[ChangeType];
-                else
+                //if (changeMap.ContainsKey(ChangeType)) return changeMap[ChangeType];
+                if (changeMap.ContainsKey(ChangeType))
                 {
-                    return ChangeType == default ? "" : ChangeType.ToString();
+                    return Enum.GetName(ChangeType);
                 }
+
+                return ChangeType == default ? "" : ChangeType.ToString();
             }
         }
 
@@ -77,6 +89,11 @@ namespace MainDialog.Models
         public ChangeItem()
         {
 
+        }
+
+        public ChangeItem(string FilePath)
+        {
+            this.FilePath = FilePath;
         }
 
 

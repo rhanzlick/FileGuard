@@ -22,43 +22,44 @@ namespace MainDialog
 
         public FileSystemWatcher Watcher
         {
-            get { return watcher; }
+            get => watcher;
             set
             {
-                if (value == null)
-                {
-                    watcher?.Dispose();
-                    WatchedPath = "";
-                }
-                if (watcher != null)
+                if(watcher is FileSystemWatcher)
                 {
                     Unsubscribe(watcher);
                 }
+
                 watcher = value;
+
                 NotifyPropertyChanged();
-                if (watcher == null) return;
-                Subscribe(watcher);
+                NotifyPropertyChanged(nameof(WatchedPath));
+
+                if (watcher != null)
+                {
+                    Subscribe(watcher);
+                }
             }
         }
 
-        private string watchedPath;
-
         public string WatchedPath
         {
-            get { return watchedPath; }
-            set { watchedPath = value; NotifyPropertyChanged(); }
+            get
+            {
+                if (Watcher == null) return String.Empty;
+                if (Watcher.Filter.Contains("*")) return Watcher.Path;
+                return Path.Combine(Watcher.Path, Watcher.Filter);
+            }
         }
-
-        //public string WatchedPath => WatchedFile?.FullName ?? "";
-
-        //public bool IsWatchedPathValid => !String.IsNullOrWhiteSpace(watchedPath) && Path.Exists(WatchedPath);
-        public bool IsWatchedPathValid => !String.IsNullOrWhiteSpace(WatchedPath) && File.Exists(WatchedPath);
 
         public ObservableCollection<ChangeItem> ChangeItemList { get; set; } = new ObservableCollection<ChangeItem>();
 
         public ViewModel()
         {
-            if (ChangeItemList != null) ChangeItemList.CollectionChanged += OnChangeItemListModified;
+            if (ChangeItemList != null)
+            {
+                ChangeItemList.CollectionChanged += OnChangeItemListModified;
+            }
         }
 
         private void CreateWatcher(string initPath)
@@ -67,7 +68,7 @@ namespace MainDialog
             {
                 Watcher?.Dispose();
 
-                if (String.IsNullOrWhiteSpace(initPath)) return;
+                if (String.IsNullOrWhiteSpace(initPath) || !Path.Exists(initPath)) return;
 
                 if (File.Exists(initPath))
                 {
@@ -76,28 +77,42 @@ namespace MainDialog
 
                     Environment.CurrentDirectory = pathInfo.DirectoryName;
 
-                    Watcher = new FileSystemWatcher(pathInfo.DirectoryName)
+                    Watcher = new FileSystemWatcher(pathInfo.DirectoryName, pathInfo.Name)
                     {
                         //NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Attributes,
                         NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite,
-                        Filter = pathInfo.Name,
                         EnableRaisingEvents = true,
                     };
 
+                    //Watcher = new FileSystemWatcher(pathInfo.DirectoryName)
+                    //{
+                    //    //NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Attributes,
+                    //    NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite,
+                    //    Filter = pathInfo.Name,
+                    //    EnableRaisingEvents = true,
+                    //};
+
                 }
-                else if (Path.Exists(initPath))
+                else if (Directory.Exists(initPath))
                 {
                     var pathInfo = new DirectoryInfo(initPath);
 
                     Environment.CurrentDirectory = pathInfo.FullName;
 
-                    Watcher = new FileSystemWatcher(pathInfo.FullName)
+                    Watcher = new FileSystemWatcher(pathInfo.FullName, "*.*")
                     {
                         NotifyFilter = NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Attributes,
-                        Filter = "*.*",
                         IncludeSubdirectories = true,
                         EnableRaisingEvents = true,
                     };
+
+                    //Watcher = new FileSystemWatcher(pathInfo.FullName)
+                    //{
+                    //    NotifyFilter = NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Attributes,
+                    //    Filter = "*.*",
+                    //    IncludeSubdirectories = true,
+                    //    EnableRaisingEvents = true,
+                    //};
 
                 }
 
@@ -108,38 +123,34 @@ namespace MainDialog
                 var flag = 0;
             }
         }
-
         public void WatchPath(string newPath)
         {
             try
             {
-                Watcher?.Dispose();
-                WatchedPath = "";
-
                 if (!(File.Exists(newPath) || Directory.Exists(newPath))) return;
 
                 CreateWatcher(newPath);
-                WatchedPath = newPath;
 
-                if(Debounce()) return;
+                if (Debounce()) return;
 
                 lastEvent = DateTimeOffset.UtcNow;
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    ChangeItemList.Add(new ChangeItem
+                    ChangeItemList.Add(new ChangeItem(newPath)
                     {
                         Timestamp = DateTimeOffset.UtcNow,
-                        ChangeDetails = "Begin Monitoring",
+                        ChangeDetails = "Start",
                     });
                 });
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
             }
 
         }
+        
         private void Subscribe(FileSystemWatcher? sysWatcher)
         {
             if (sysWatcher == null) return;
@@ -165,11 +176,12 @@ namespace MainDialog
             lastEvent = DateTimeOffset.UtcNow;
             Application.Current.Dispatcher.Invoke(() =>
             {
-                ChangeItemList.Add(new ChangeItem()
+                ChangeItemList.Add(new ChangeItem(Path.Combine(Watcher.Path, e.Name))
                 {
                     Timestamp = DateTimeOffset.UtcNow,
                     ChangeType = e.ChangeType,
-                    ChangeDetails = $"Monitoring: {e.OldName} -> {e.Name}",
+                    //ChangeDetails = $"Monitoring: {e.OldName} -> {e.Name}",
+                    ChangeDetails = $"{e.OldName} -> {e.Name}",
                 });
             });
 
@@ -184,20 +196,20 @@ namespace MainDialog
 
             if(e.ChangeType == WatcherChangeTypes.Deleted)
             {
-                WatchPath("");
+                //WatchPath("");
+                Watcher = null;
             }
             else
             {
                 lastEvent = DateTimeOffset.UtcNow;
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    ChangeItemList.Add(new ChangeItem()
+                    ChangeItemList.Add(new ChangeItem(Watcher.Path)
                     {
                         Timestamp = DateTimeOffset.UtcNow,
                         ChangeType = e.ChangeType,
                     });
                 });
-                
             }
         }
 
@@ -217,24 +229,28 @@ namespace MainDialog
         private void OnChangeItemListModified(object? sender, NotifyCollectionChangedEventArgs e)
         {
             NotifyPropertyChanged(nameof(ChangeItemList));
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                e.NewItems?.OfType<ChangeItem>().ToList().ForEach(i => i.PropertyChanged += ChangeItemModified);
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Remove)
-            {
-                e.OldItems?.OfType<ChangeItem>().ToList().ForEach(i => i.PropertyChanged -= ChangeItemModified);
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Replace)
-            {
-                e.OldItems?.OfType<ChangeItem>().ToList().ForEach(i => i.PropertyChanged -= ChangeItemModified);
-                e.NewItems?.OfType<ChangeItem>().ToList().ForEach(i => i.PropertyChanged += ChangeItemModified);
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Reset && sender is ObservableCollection<ChangeItem> coll)
-            {
-                coll?.ToList().ForEach(i => i.PropertyChanged += ChangeItemModified);
-            }
         }
+        //private void OnChangeItemListModified(object? sender, NotifyCollectionChangedEventArgs e)
+        //{
+        //    NotifyPropertyChanged(nameof(ChangeItemList));
+        //    if (e.Action == NotifyCollectionChangedAction.Add)
+        //    {
+        //        e.NewItems?.OfType<ChangeItem>().ToList().ForEach(i => i.PropertyChanged += ChangeItemModified);
+        //    }
+        //    else if (e.Action == NotifyCollectionChangedAction.Remove)
+        //    {
+        //        e.OldItems?.OfType<ChangeItem>().ToList().ForEach(i => i.PropertyChanged -= ChangeItemModified);
+        //    }
+        //    else if (e.Action == NotifyCollectionChangedAction.Replace)
+        //    {
+        //        e.OldItems?.OfType<ChangeItem>().ToList().ForEach(i => i.PropertyChanged -= ChangeItemModified);
+        //        e.NewItems?.OfType<ChangeItem>().ToList().ForEach(i => i.PropertyChanged += ChangeItemModified);
+        //    }
+        //    else if (e.Action == NotifyCollectionChangedAction.Reset && sender is ObservableCollection<ChangeItem> coll)
+        //    {
+        //        coll?.ToList().ForEach(i => i.PropertyChanged += ChangeItemModified);
+        //    }
+        //}
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void NotifyPropertyChanged([CallerMemberName] string propName = null)
